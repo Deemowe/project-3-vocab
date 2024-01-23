@@ -1,0 +1,57 @@
+"""
+Nose tests for vocab.py
+"""
+
+import nose  # Testing framework
+import logging
+
+from vocab import Vocab
+
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
+log = logging.getLogger(__name__)
+
+
+def test_empty_vocab():
+    """
+    Nothing is present in an empty word list
+    """
+    vocab = Vocab([])
+    assert vocab.as_list() == []
+    assert not vocab.has("sheep")
+
+
+def test_single_vocab():
+    vocab = Vocab(["moe"])
+    assert vocab.as_list() == ["moe"]
+    assert vocab.has("moe")
+    assert not vocab.has("meeny")
+
+
+def test_small_vocab():
+    l = ["eeny", "moe", "miney", "meeny"]
+    vocab = Vocab(l)
+    assert vocab.has("moe")
+    assert vocab.has("eeny")
+    assert vocab.has("miney")
+    assert vocab.has("meeny")
+    assert not vocab.has("many")
+    assert sorted(vocab.as_list()) == sorted(l)
+
+
+def test_from_simulated_file():
+    from io import StringIO
+    l = StringIO(initial_value="""
+        #comment
+        # another comment line
+        sheep
+
+        elephants
+        #comment
+        squirrels
+        """)
+    vocab = Vocab(l)
+    assert sorted(vocab.as_list()) == ["elephants", "sheep", "squirrels"]
+    assert vocab.has("sheep")
+    assert vocab.has("elephants")
+    assert vocab.has("squirrels")
+    assert not vocab.has("#comment")

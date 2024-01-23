@@ -1,0 +1,358 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<head>
+    <!-- Bootstrap requires the following three meta tags to appear first -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <title>تهجئة الكلمات</title>
+
+    <!-- Javascript and Cascading Style Sheets (css) libraries -->
+    <!-- mostly from content delivery networks                 -->
+
+    <!-- jquery; CDN load is usually quick because it's likely cached -->
+    <script type="text/javascript"
+            src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js">
+    </script>
+
+    <!-- Bootstrap stylesheet let's us have a 'responsive' layout; -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+          integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+          crossorigin="anonymous">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+            integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+            crossorigin="anonymous">
+    </script>
+
+    <!-- Our own css file.  Note how we can link directly here and not -->
+    <!-- write any routing code in the Flask application. -->
+    <link rel="stylesheet" href="/static/jumble.css" />
+
+</head>
+
+<body>
+    <nav class="navbar bg-body-tertiary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <img src="../static/img/qu.png" alt="QU" width="30" height="24">
+            </a>
+            <div class="nav-item ms-auto">
+                <button class="btn btn-secondary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">تعليمات المشروع</button>
+    
+                <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasScrollingLabel">يجب تعديل التالي</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <ul>
+                            <li><p>جعل النظام يتحقق من الكلمات بدون الحاجة لتحديث كامل الصفحة عن طريق استخدام ايجاكس في الجزء الخاص بالمستخدم (حذف الزر الخاص المسمى "جرب" والاعتماد على Javascript)</p></li>
+                            <li><p>بناء السكريبت الاساسي من جانب الخادم لايصال المعلومة للجزء الخاص بالعميل</p></li>
+                            <li><p>ادارة التواصل بين جهة الخادم والمستخدم بحيث يكون التغيير الوحيد في كامل الصفحة عند اكمال الحل بشكل صحيح</p></li>
+                        </ul>
+                        <p class="fw-bold">اصلاحات اضافية</p>
+                        <ul>
+                            <li><p>توضيح الكلمات التي بدأ المستخدم بتخمينها بشكل تلقائي ومباشر اثناء كتابة المستخدم للكلمة</p></li>
+                            <li><p>شطب الكلمات التي تم تخمينها من قبل المستخدم من خلال تغيير لونها إلى لون اخر. مثلا تكون باللون الرصاصي.</p></li>
+                            <li><p>حذف الحروف التي يدخلها المستخدم ولا تكون من ضمن الحروف المحددة بشكل مباشر. أي اذا كانت الحروف المحددة "أ ب ت"، بمحاولة المستخدم الضغط على "ف" نقوم بحذف الحرف مباشرة.</p></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+      </div>
+    </nav>
+<div class="container text-center" style="border:1px solid #cecece;">
+    <br>
+    <div class="row">
+        <div class="col col-xs-6">
+            <h1>الكلمات</h1>
+        </div>
+    </div>
+    <!-- Vocabulary words layed out in 6 columns;
+    -- bootstrap may collapse to fewer columns and
+    -- more rows if the window is narrow.
+    -->
+    <div class="row">
+        {% for word in g.vocab %}
+            <div class="col col-xs-2 vocab-word"> {{ word }}</div>
+            {% if loop.index is divisibleby 3 %}
+                </div> <!-- row -->
+                <div class="row">
+            {% endif %}
+        {% endfor %}
+    </div> <!-- row -->
+
+    <br />
+
+    <div class="row">
+        <div class="col col-xs-6">
+            <p class="fs-3">استخدم احد الاحرف التالية</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col col-xs-6 lead">
+            <strong>{{ session.jumble }}</strong>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col col-xs-6">
+            <p class="fw-lighter">لتهجأة عدد {{session.target_count}} كلمات من القائمة</p>
+        </div> <!-- col -->
+    </div> <!-- row -->
+
+    <br />
+
+    <div class="row">
+        <div class="col-xs-6 text-center">
+          <input id="attempt" name="attempt" type="text" width="15"
+            autocomplete="off"  autofocus />
+            <label for="attempt">الكــلمة</label>
+
+        </form>
+      </div></div>
+      
+      <br />
+      
+      <!-- id to store and provide the real-time info on the response from flashMessage -->
+      <p id="response"> </p>
+   
+      <!-- id to store our matches that the user has made -->
+      <p id="matchStorage"> </p>
+
+
+
+      <!-- <script>
+        $("#entry").submit(function(event) {
+            event.preventDefault();
+        });
+    
+        $("#attempt").keyup(function(event) {
+            var txt = $("#attempt").val();  // Current content of the input field
+            var jumble = "{{ session.jumble }}"; // Get the jumble from the session
+            var originalTxt = txt;
+
+
+            var keycode = event.which;      // The key that just went up
+            var letter = String.fromCharCode(keycode);
+
+            var check_jumble = Array.from(txt).filter(char => jumble.includes(char)).join('');
+             // Filter out characters not in the jumble
+            txt = check_jumble
+
+
+            if (originalTxt !== txt) {
+        // Show a flash message if any characters were removed
+        var responseHtml = "<div class='alert alert-danger alert-dismissible fade show' role='alert'>";
+        responseHtml += "تم استبعاد الحروف التي ليست في اللغز!";
+        responseHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+        responseHtml += "</div>";
+        $("#response").html(responseHtml);
+    }
+    
+            $("#attempt").val(txt); // Set the filtered text back to the input
+    
+    
+            // Highlight words in vocabulary that start with the entered letters
+            if(check_jumble){
+                $(".vocab-word").each(function() {
+                var word = $(this).text().trim();
+                if (word.startsWith(txt)) {
+                    $(this).addClass('highlighted-word');
+                } else {
+                    $(this).removeClass('highlighted-word');
+                }
+            });
+            
+        }
+
+
+
+            // Now we go to our check function in flask_vocab.py
+            $.getJSON("/_check", { text: txt }, function(data) {
+                // Pull our values from the dictionary in flask_vocab
+                var flashMessage = data.result.flashMessage;
+                var solved = data.result.solved;
+                var matchesMade = data.result.matchesMade;
+                var matchMade = data.result.matchMade;
+    
+                // Initialize the HTML strings
+                var responseHtml = "";
+                var matchStorageHtml = "";
+
+
+    
+                // Check if there was a match made
+                if (matchMade) {
+                    $("#attempt").val(""); // This will reset the textbox when a match is made
+    
+                    matchStorageHtml = "<h2>تم ايجاد</h2>";
+                    for (var i = 0; i < matchesMade.length; i++) {
+                        matchStorageHtml += "<div class='alert alert-success' role='alert'>" + matchesMade[i] + "</div>";
+                    }
+    
+                    if(flashMessage){
+                        responseHtml = "<div class='alert alert-danger alert-dismissible fade show' role='alert'>";
+                        responseHtml += flashMessage;
+                        responseHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                        responseHtml += "</div>";
+                    }
+    
+                } else {
+                    responseHtml = "<div class='alert alert-danger alert-dismissible fade show' role='alert'>";
+                    responseHtml += flashMessage;
+                    responseHtml += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                    responseHtml += "</div>";
+                }
+    
+                // Update the DOM with the new HTML
+                $("#response").html(responseHtml);
+                $("#matchStorage").html(matchStorageHtml);
+
+
+                // Loop through each vocabulary word
+                $(".vocab-word").each(function() {
+                var word = $(this).text().trim();
+        
+                // If the word is in matchesMade list, cross it out
+                if (matchesMade.includes(word)) {
+                $(this).css("text-decoration", "line-through");
+             }
+        });
+    
+                // Once the user has guessed the right amount of words specified, they will get the success page
+                if (solved) {
+                    window.location.replace("/success");
+                }
+            });
+        });
+    </script> -->
+
+
+    <script>
+        // Wait until the document is fully loaded
+        $(document).ready(function() {
+            
+            // Prevent the default submission behavior for the 'entry' form
+            $("#entry").submit(function(event) {
+                event.preventDefault();
+            });
+    
+            // Listen to keyup events on the 'attempt' input field
+            $("#attempt").keyup(function(event) {
+                // Get the current content of the 'attempt' input field
+                const txt = $("#attempt").val();
+                
+                // Retrieve the 'jumble' from the session
+                const jumble = "{{ session.jumble }}";
+                
+                // Identify the key that has been pressed
+                const keycode = event.which;
+                const letter = String.fromCharCode(keycode);
+    
+                // Filter the characters in the 'attempt' input that are not in the 'jumble'
+                const check_jumble = Array.from(txt).filter(char => jumble.includes(char)).join('');
+                
+                // Update the 'attempt' input with the filtered content
+                $("#attempt").val(check_jumble);
+    
+                // If any characters were removed from the 'attempt' input, show a flash message
+                if (txt !== check_jumble) {
+                    const responseHtml = `
+                        <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                            تم استبعاد الحروف التي ليست في اللغز!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>`;
+                    $("#response").html(responseHtml);
+                }
+    
+                // If there's content in the 'attempt' input after filtering
+                if(check_jumble){
+                    // Highlight words in the vocabulary list that start with the entered letters
+                    $(".vocab-word").each(function() {
+                        const word = $(this).text().trim();
+                        if (word.startsWith(check_jumble)) {
+                            $(this).addClass('highlighted-word');
+                        } else {
+                            $(this).removeClass('highlighted-word');
+                        }
+                    });
+                }
+    
+                // Make an AJAX request to check the 'attempt' input against the server-side vocabulary
+                $.getJSON("/_check", { text: check_jumble }, function(data) {
+                    const flashMessage = data.result.flashMessage;
+                    const solved = data.result.solved;
+                    const matchesMade = data.result.matchesMade;
+                    const matchMade = data.result.matchMade;
+    
+                    let responseHtml = "";
+                    let matchStorageHtml = "";
+    
+                    // If a match is found between the 'attempt' and the vocabulary
+                    if (matchMade) {
+                        // Reset the 'attempt' input
+                        $("#attempt").val("");
+    
+                        // Construct HTML to indicate a match was found
+                        matchStorageHtml = "<h2>تم ايجاد</h2>";
+                        matchesMade.forEach(match => {
+                            matchStorageHtml += `<div class='alert alert-success' role='alert'>${match}</div>`;
+                        });
+    
+                        // Show flash message if available
+                        if (flashMessage) {
+                            responseHtml = `
+                                <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                                    ${flashMessage}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>`;
+                        }
+                    } else {
+                        // If no match, show the flash message
+                        responseHtml = `
+                            <div class='alert alert-danger alert-dismissible fade show' role='alert'>
+                                ${flashMessage}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>`;
+                    }
+    
+                    // Update the DOM with the constructed HTML for response and matches
+                    $("#matchStorage").html(matchStorageHtml);
+                    $("#response").html(responseHtml);
+
+    
+                    // Cross out words in the vocabulary that are part of the matches
+                    $(".vocab-word").each(function() {
+                        const word = $(this).text().trim();
+                        if (matchesMade.includes(word)) {
+                            $(this).css({
+                                "text-decoration": "line-through",
+                                "color": "red"
+                            });
+                        }
+                    });
+    
+                    // If the puzzle is solved, redirect the user to the success page
+                    if (solved) {
+                        window.location.replace("/success");
+                    }
+                });
+            });
+        });
+    </script>
+    
+
+
+    
+       </div> <!-- container -->
+      </body> </html>
+      
